@@ -124,7 +124,7 @@ POST /verify
 
 ```json
 {
-  "name": "Jeet",
+  "name": "J",
   "dob": "1995-01-15",
   "address": "India"
 }
@@ -187,6 +187,99 @@ docker run -p 8000:8000 bgv-system
 * Uvicorn
 * Asyncio
 * Docker
+
+## System Architecture
+
+```
+Client Request
+      |
+      v
+FastAPI API Layer
+      |
+      v
+Orchestrator
+      |
+      +--> Name Verification Agent
+      +--> DOB Verification Agent
+      +--> Address Verification Agent
+      |
+      v
+State Manager
+      |
+      v
+Audit Logger
+      |
+      v
+Final Verification Response
+```
+
+## Execution Flow
+
+1. Client submits candidate data through POST /verify
+2. Request is validated using Pydantic schemas
+3. Orchestrator initializes the verification workflow
+4. Verification agents execute independently
+5. Results are aggregated and stored in the state manager
+6. Audit logs are generated
+7. Final verification report is returned
+
+## State Management
+
+The system maintains:
+
+* run_id
+* execution status
+* verification results
+* cache status
+* audit history
+
+State transitions:
+
+```
+Running -> Completed
+Running -> Failed
+Completed -> Cached
+```
+
+## Execution States
+
+| State     | Description                                |
+| --------- | ------------------------------------------ |
+| Running   | Verification is currently executing        |
+| Completed | Verification completed successfully        |
+| Failed    | One or more verification checks failed     |
+| Fresh     | Result generated from a new execution      |
+| Cached    | Result retrieved from a previous execution |
+
+## Selective Re-Execution Logic
+
+The system supports selective re-execution to avoid unnecessary processing.
+
+Rules:
+
+* If candidate information changes, only affected agents are re-executed.
+* Unchanged verification results are reused from cache.
+* This reduces execution time and improves efficiency.
+
+Example:
+
+Initial Verification:
+
+* Name: Jeet Pawar
+* DOB: 1995-01-15
+* Address: Pune
+
+Updated Verification:
+
+* Name: Jeet Pawar
+* DOB: 1995-01-15
+* Address: Pune
+
+Outcome:
+
+* Address Verification Agent executes again.
+* Name Verification Agent uses cached result.
+* DOB Verification Agent uses cached result.
 
 ---
 
