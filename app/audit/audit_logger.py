@@ -1,11 +1,19 @@
-import logging
+from datetime import datetime
 
-logging.basicConfig(
-    filename="audit.log",
-    level=logging.INFO
-)
+audit_history = []
 
 
-def log_event(message):
+def log_event(agent_name, status):
 
-    logging.info(message)
+    audit_history.append(
+        {
+            "agent": agent_name,
+            "status": status,
+            "timestamp": datetime.now().isoformat()
+        }
+    )
+
+
+def get_audit_history():
+
+    return audit_history

@@ -1,21 +1,16 @@
-import json
-
-FILE = "app/state/execution_store.json"
+execution_store = {}
 
 
-def save_state(data):
+def save_state(run_id, state):
 
-    with open(FILE, "w") as f:
-        json.dump(data, f)
+    execution_store[run_id] = state
 
 
-def load_state():
+def get_state(run_id):
 
-    try:
+    return execution_store.get(run_id)
 
-        with open(FILE) as f:
-            return json.load(f)
 
-    except:
+def get_all_states():
 
-        return {}
+    return execution_store

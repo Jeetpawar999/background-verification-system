@@ -1,13 +1,48 @@
 def generate_report(results):
 
-    overall = "PASS"
+    overall_status = "PASS"
 
-    for item in results.values():
+    risk_score = 0
 
-        if item["status"] == "FAIL":
-            overall = "FAIL"
+    findings = []
+
+    for item in results:
+
+        if isinstance(item, dict):
+
+            if item.get("status") == "FAIL":
+
+                overall_status = "FAIL"
+
+                risk_score += 20
+
+                findings.append(
+                    item.get(
+                        "message",
+                        "Verification failed"
+                    )
+                )
 
     return {
-        "overall_status": overall,
-        "details": results
+
+        "executive_summary":
+            f"Verification completed with status {overall_status}",
+
+        "overall_status":
+            overall_status,
+
+        "risk_score":
+            risk_score,
+
+        "key_findings":
+            findings,
+
+        "flags_and_alerts":
+            findings,
+
+        "execution_type":
+            "fresh",
+
+        "details":
+            results
     }

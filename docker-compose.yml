@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+
+  bgv-system:
+
+    build: .
+
+    container_name: bgv-system
+
+    ports:
+      - "8000:8000"
+
+    restart: always
