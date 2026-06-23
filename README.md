@@ -4,62 +4,88 @@
 
 This project is an AI-powered Background Verification System built using FastAPI and Python.
 
-The system verifies the following candidate information:
+The system performs Identity, Criminal, and Financial background verification using independent verification agents executed through a centralized orchestration layer.
 
-* Name
-* Date of Birth (DOB)
-* Address
+The application supports:
 
-Each verification task is handled by a dedicated agent.
+* Identity Verification
+* Criminal Background Verification
+* Financial Verification
+* Audit Logging
+* State Management
+* File Upload Support
+* Docker Deployment
 
 ---
 
-## Key Features
+# Key Features
 
-### Verification Agents
+## Identity Verification
 
-* Name Verification Agent
+* Name Validation Agent
 * DOB Verification Agent
 * Address Verification Agent
 
-### Orchestration Layer
+## Criminal Background Verification
 
-* Executes all verification agents
+* Federal Criminal Check Agent
+* State Criminal Check Agent
+* County Records Check Agent
+
+## Financial Verification
+
+* Credit Verification Agent
+* Fraud Detection Agent
+* PEP Screening Agent
+
+## Orchestration Layer
+
+* Executes verification agents in parallel using AsyncIO
 * Aggregates verification results
-* Generates the final verification report
+* Generates final verification response
 
-### State Management
+## State Management
 
-* Maintains the current verification state
-* Determines the final verification status (Verified/Failed)
+* Maintains verification state
+* Stores execution results
+* Tracks execution status
+* Supports cached/fresh execution tracking
 
-### Audit Trail
+## Audit Trail
 
-* Records all verification events
-* Stores logs with timestamps
+* Records verification events
+* Stores execution timestamps
+* Maintains execution history
 
-### REST APIs
+## REST APIs
 
 * POST /verify
 * GET /audit
+* GET /
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```text
 background-verification-system/
-│
+
 ├── app/
-│   ├── agents/
-│   ├── api/
-│   ├── models/
-│   ├── orchestration/
-│   ├── state/
-│   ├── utils/
-│   └── main.py
 │
+├── agents/
+│   ├── identity/
+│   ├── criminal/
+│   └── financial/
+│
+├── api/
+├── audit/
+├── models/
+├── orchestration/
+├── state/
+│
+├── uploads/
 ├── tests/
+│
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
@@ -68,23 +94,23 @@ background-verification-system/
 
 ---
 
-## Installation
+# Installation
 
-### Create a Virtual Environment
+## Create Virtual Environment
 
 ```bash
 python -m venv venv
 ```
 
-### Activate the Environment
+## Activate Environment
 
-Windows:
+Windows
 
 ```bash
 venv\Scripts\activate
 ```
 
-### Install Dependencies
+## Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -92,19 +118,19 @@ pip install -r requirements.txt
 
 ---
 
-## Run the Application
+# Run Application
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Application URL:
+Application URL
 
 ```text
 http://127.0.0.1:8000
 ```
 
-Swagger Documentation:
+Swagger Documentation
 
 ```text
 http://127.0.0.1:8000/docs
@@ -112,39 +138,60 @@ http://127.0.0.1:8000/docs
 
 ---
 
-## Candidate Verification
+# API Endpoints
 
-### API Endpoint
+## Health Check
+
+```http
+GET /
+```
+
+Response
+
+```json
+{
+  "status": "ok"
+}
+```
+
+---
+
+## Verify Candidate
 
 ```http
 POST /verify
 ```
 
-### Request Example
+### Form Parameters
 
-```json
-{
-  "name": "J",
-  "dob": "1995-01-15",
-  "address": "India"
-}
+| Parameter     | Type   |
+| ------------- | ------ |
+| full_name     | String |
+| dob           | String |
+| address       | String |
+| government_id | String |
+| aadhaar_image | File   |
+
+### Example Input
+
+```text
+full_name = Jeet Pawar
+dob = 1995-11-19
+address = Pune
+government_id = ABC123456
+aadhaar_image = aadhaar.jpg
 ```
 
-### Response Example
+### Example Response
 
 ```json
 {
+  "run_id": "12345678",
   "status": "completed",
-  "results": {
-    "name": {
-      "verified": true
-    },
-    "dob": {
-      "verified": true
-    },
-    "address": {
-      "verified": true
-    }
+  "cache_status": {
+    "identity": "fresh",
+    "criminal": "fresh",
+    "financial": "fresh"
   }
 }
 ```
@@ -153,44 +200,38 @@ POST /verify
 
 ## Audit Logs
 
-### API Endpoint
-
 ```http
 GET /audit
 ```
 
-Returns the complete verification audit history and logs.
+### Example Response
+
+```json
+[
+  {
+    "agent": "verification",
+    "status": "started"
+  },
+  {
+    "agent": "identity_verification",
+    "status": "completed"
+  },
+  {
+    "agent": "criminal_verification",
+    "status": "completed"
+  },
+  {
+    "agent": "financial_verification",
+    "status": "completed"
+  }
+]
+```
 
 ---
 
-## Docker Setup
+# System Architecture
 
-### Build Docker Image
-
-```bash
-docker build -t bgv-system .
-```
-
-### Run Docker Container
-
-```bash
-docker run -p 8000:8000 bgv-system
-```
-
----
-
-## Technologies Used
-
-* Python
-* FastAPI
-* Pydantic
-* Uvicorn
-* Asyncio
-* Docker
-
-## System Architecture
-
-```
+```text
 Client Request
       |
       v
@@ -199,9 +240,17 @@ FastAPI API Layer
       v
 Orchestrator
       |
-      +--> Name Verification Agent
+      +--> Name Validation Agent
       +--> DOB Verification Agent
       +--> Address Verification Agent
+      |
+      +--> Federal Criminal Check Agent
+      +--> State Criminal Check Agent
+      +--> County Records Check Agent
+      |
+      +--> Credit Verification Agent
+      +--> Fraud Detection Agent
+      +--> PEP Screening Agent
       |
       v
 State Manager
@@ -213,74 +262,89 @@ Audit Logger
 Final Verification Response
 ```
 
-## Execution Flow
+---
 
-1. Client submits candidate data through POST /verify
-2. Request is validated using Pydantic schemas
-3. Orchestrator initializes the verification workflow
-4. Verification agents execute independently
-5. Results are aggregated and stored in the state manager
-6. Audit logs are generated
-7. Final verification report is returned
+# Execution Flow
 
-## State Management
+1. User submits candidate information through POST /verify
+2. FastAPI validates incoming request
+3. Orchestrator starts verification workflow
+4. Identity agents execute
+5. Criminal agents execute
+6. Financial agents execute
+7. Results are aggregated
+8. State Manager stores execution results
+9. Audit Logger records execution history
+10. Final verification response is returned
+
+---
+
+# State Management
 
 The system maintains:
 
-* run_id
-* execution status
-* verification results
-* cache status
-* audit history
+* Run ID
+* Verification Status
+* Verification Results
+* Cache Status
+* Execution History
+* Audit Logs
 
-State transitions:
+---
 
+# Execution States
+
+| State     | Description                           |
+| --------- | ------------------------------------- |
+| Running   | Verification currently executing      |
+| Completed | Verification completed successfully   |
+| Failed    | Verification execution failed         |
+| Fresh     | Result generated from new execution   |
+| Cached    | Result reused from previous execution |
+
+---
+
+# Docker Setup
+
+## Build Docker Image
+
+```bash
+docker build -t bgv-system .
 ```
-Running -> Completed
-Running -> Failed
-Completed -> Cached
+
+## Run Docker Container
+
+```bash
+docker run -p 8000:8000 bgv-system
 ```
 
-## Execution States
+## Run Using Docker Compose
 
-| State     | Description                                |
-| --------- | ------------------------------------------ |
-| Running   | Verification is currently executing        |
-| Completed | Verification completed successfully        |
-| Failed    | One or more verification checks failed     |
-| Fresh     | Result generated from a new execution      |
-| Cached    | Result retrieved from a previous execution |
+```bash
+docker-compose up --build
+```
 
-## Selective Re-Execution Logic
+---
 
-The system supports selective re-execution to avoid unnecessary processing.
+# Technologies Used
 
-Rules:
-
-* If candidate information changes, only affected agents are re-executed.
-* Unchanged verification results are reused from cache.
-* This reduces execution time and improves efficiency.
-
-Example:
-
-Initial Verification:
-
-* Name: Jeet Pawar
-* DOB: 1995-01-15
-* Address: Pune
-
-Updated Verification:
-
-* Name: Jeet Pawar
-* DOB: 1995-01-15
-* Address: Pune
-
-Outcome:
-
-* Address Verification Agent executes again.
-* Name Verification Agent uses cached result.
-* DOB Verification Agent uses cached result.
+* Python 3.11
+* FastAPI
+* Pydantic
+* AsyncIO
+* Uvicorn
+* Docker
+* Git
+* GitHub
 
 ---
 
 
+
+---
+
+# Author
+
+Jeet Pawar
+
+AI Engineer
