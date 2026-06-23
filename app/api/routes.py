@@ -1,9 +1,10 @@
 from fastapi import APIRouter, UploadFile, File, Form
 import os
-from app.orchestration.reexecutor import reexecute
 
+from app.orchestration.reexecutor import reexecute
 from app.audit.audit_logger import get_audit_history
 from app.orchestration.orchestrator import execute_verification
+from app.state.state_manager import get_all_states
 
 router = APIRouter()
 
@@ -47,6 +48,14 @@ async def verify(
 def audit():
 
     return get_audit_history()
+
+
+@router.get("/state")
+def state():
+
+    return get_all_states()
+
+
 @router.post("/feedback")
 async def feedback(
     feedback: dict

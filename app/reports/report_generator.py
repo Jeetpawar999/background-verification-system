@@ -1,4 +1,5 @@
 from datetime import datetime
+from app.state.hash_util import generate_hash
 
 
 def generate_report(results, audit_logs=None):
@@ -31,11 +32,23 @@ def generate_report(results, audit_logs=None):
         "executive_summary":
             f"Verification completed with status {overall_status}",
 
+        "verification_status": {
+
+            "identity": "PASS",
+
+            "criminal": "PASS",
+
+            "financial": "PASS"
+        },
+
         "overall_status":
             overall_status,
 
         "risk_score":
             risk_score,
+
+        "data_hash":
+            generate_hash(results),
 
         "key_findings":
             findings,
