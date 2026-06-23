@@ -22,5 +22,5 @@ async def run(data):
             False,
 
         "message":
-            f"No sex offender registry match found for {full_name}"
+            f"No registry match found for {full_name}"
     }

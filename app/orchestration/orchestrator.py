@@ -5,16 +5,23 @@ import uuid
 from app.agents.identity.name_validation import run as name_check
 from app.agents.identity.dob_verification import run as dob_check
 from app.agents.identity.address_verification import run as address_check
+from app.agents.identity.government_id_validation import run as government_id_check
+from app.agents.identity.address_history_verification import run as address_history_check
 
 # Criminal Agents
 from app.agents.criminal.federal_check import run as federal_check
 from app.agents.criminal.state_check import run as state_check
 from app.agents.criminal.county_check import run as county_check
+from app.agents.criminal.sex_offender_registry import run as sex_offender_check
+from app.agents.criminal.interpol_verification import run as interpol_check
 
 # Financial Agents
 from app.agents.financial.credit_check import run as credit_check
 from app.agents.financial.fraud_detection import run as fraud_check
 from app.agents.financial.pep_screening import run as pep_check
+from app.agents.financial.sanctions_screening import run as sanctions_check
+from app.agents.financial.bankruptcy_check import run as bankruptcy_check
+from app.agents.financial.adverse_media import run as adverse_media_check
 
 from app.audit.audit_logger import (
     log_event,
@@ -23,7 +30,6 @@ from app.audit.audit_logger import (
 
 from app.state.state_manager import save_state
 
-# Report Generator
 from app.reports.report_generator import generate_report
 
 
@@ -42,16 +48,23 @@ async def execute_verification(data):
         name_check(data),
         dob_check(data),
         address_check(data),
+        government_id_check(data),
+        address_history_check(data),
 
         # Criminal Verification
         federal_check(data),
         state_check(data),
         county_check(data),
+        sex_offender_check(data),
+        interpol_check(data),
 
         # Financial Verification
         credit_check(data),
         fraud_check(data),
-        pep_check(data)
+        pep_check(data),
+        sanctions_check(data),
+        bankruptcy_check(data),
+        adverse_media_check(data)
     )
 
     log_event(
