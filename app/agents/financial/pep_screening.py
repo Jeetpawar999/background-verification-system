@@ -1,6 +1,10 @@
-def pep_screening():
+import asyncio
+
+async def run(data):
+
+    await asyncio.sleep(1)
 
     return {
-        "status": "PASS",
-        "pep_match": False
+        "agent": "PEP Screening",
+        "status": "PASS"
     }

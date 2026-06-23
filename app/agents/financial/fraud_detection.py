@@ -1,6 +1,10 @@
-def fraud_detection():
+import asyncio
+
+async def run(data):
+
+    await asyncio.sleep(1)
 
     return {
-        "status": "PASS",
-        "risk": "LOW"
+        "agent": "Fraud Detection",
+        "status": "PASS"
     }
