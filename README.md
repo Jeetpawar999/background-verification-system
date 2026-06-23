@@ -343,8 +343,4 @@ docker-compose up --build
 
 ---
 
-# Author
 
-Jeet Pawar
-
-AI Engineer
