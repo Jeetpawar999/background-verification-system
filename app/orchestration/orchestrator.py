@@ -16,8 +16,15 @@ from app.agents.financial.credit_check import run as credit_check
 from app.agents.financial.fraud_detection import run as fraud_check
 from app.agents.financial.pep_screening import run as pep_check
 
-from app.audit.audit_logger import log_event
+from app.audit.audit_logger import (
+    log_event,
+    get_audit_history
+)
+
 from app.state.state_manager import save_state
+
+# Report Generator
+from app.reports.report_generator import generate_report
 
 
 async def execute_verification(data):
@@ -75,11 +82,18 @@ async def execute_verification(data):
         "completed"
     )
 
+    report = generate_report(
+        results,
+        get_audit_history()
+    )
+
     return {
 
         "run_id": run_id,
 
         "status": "completed",
+
+        "report": report,
 
         "cache_status": {
 

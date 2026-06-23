@@ -1,4 +1,7 @@
-def generate_report(results):
+from datetime import datetime
+
+
+def generate_report(results, audit_logs=None):
 
     overall_status = "PASS"
 
@@ -40,8 +43,20 @@ def generate_report(results):
         "flags_and_alerts":
             findings,
 
-        "execution_type":
-            "fresh",
+        "execution_timestamp":
+            datetime.now().isoformat(),
+
+        "audit_trail":
+            audit_logs if audit_logs else [],
+
+        "cache_status": {
+
+            "identity": "fresh",
+
+            "criminal": "fresh",
+
+            "financial": "fresh"
+        },
 
         "details":
             results
