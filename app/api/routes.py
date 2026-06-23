@@ -1,18 +1,47 @@
+from fastapi import APIRouter, UploadFile, File, Form
+import os
+
 from app.audit.audit_logger import get_audit_history
-from fastapi import APIRouter
-from app.models.schemas import Candidate
 from app.orchestration.orchestrator import execute_verification
 
 router = APIRouter()
 
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
 @router.post("/verify")
-async def verify(candidate: Candidate):
+async def verify(
+    full_name: str = Form(...),
+    dob: str = Form(...),
+    address: str = Form(...),
+    government_id: str = Form(...),
+    aadhaar_image: UploadFile = File(...)
+):
+
+    file_path = os.path.join(
+        UPLOAD_DIR,
+        aadhaar_image.filename
+    )
+
+    with open(file_path, "wb") as f:
+        f.write(await aadhaar_image.read())
+
+    candidate_data = {
+        "full_name": full_name,
+        "dob": dob,
+        "address": address,
+        "government_id": government_id,
+        "aadhaar_image": file_path
+    }
 
     result = await execute_verification(
-        candidate.dict()
+        candidate_data
     )
 
     return result
+
+
 @router.get("/audit")
 def audit():
 
